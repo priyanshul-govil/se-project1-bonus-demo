@@ -58,7 +58,7 @@ def analyze_and_refactor_smells(file_path):
         },
         {
         "role": "user",
-        "content": "Provide a refactored code based on your suggestions. If any refactoring requires modification of external files, skip it. Provide the entire code without any assumptions. Do not include anything apart from the code, as the code would be copy-pasted for testing purposes. Keep the comments of the original code."
+        "content": "Provide a refactored code based on your suggestions. Keep the comments of the original code. If any refactoring requires modification of external files, skip it. Provide the entire code without any assumptions. Do not include anything apart from the code, as the code would be copy-pasted for testing purposes."
         },
     ],
     temperature=1,
@@ -80,16 +80,16 @@ def analyze_and_refactor_smells(file_path):
 
 def main(directory):
     """Iterate over all Python files in the directory, analyze them for design smells, and attempt refactoring."""
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".java"):
-                file_path = os.path.join(root, file)
+    # for root, _, files in os.walk(directory):
+    #     for file in files:
+    #         if file.endswith(".java"):
+    #             file_path = os.path.join(root, file)
                 
-                # Detect and refactor design smells
-                analyze_and_refactor_smells(file_path)
+    #             # Detect and refactor design smells
+    #             analyze_and_refactor_smells(file_path)
 
-                # Testing purposes: exit after processing one file
-                exit()
+    file_path = 'books-web/src/main/java/com/sismics/books/rest/resource/AppResource.java'
+    analyze_and_refactor_smells(file_path)
 
 if __name__ == "__main__":
     directory_to_analyze = "."
