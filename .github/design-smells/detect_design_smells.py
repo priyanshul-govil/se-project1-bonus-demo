@@ -58,7 +58,7 @@ def analyze_and_refactor_smells(file_path):
         },
         {
         "role": "user",
-        "content": "Provide a refactored code based on your suggestions. If any refactoring requires modification of external files, skip it. Provide the entire code without any assumptions. Do not include anything apart from the code, as the code would be copy-pasted for testing purposes."
+        "content": "Provide a refactored code based on your suggestions. If any refactoring requires modification of external files, skip it. Provide the entire code without any assumptions. Do not include anything apart from the code, as the code would be copy-pasted for testing purposes. Keep the comments of the original code."
         },
     ],
     temperature=1,
