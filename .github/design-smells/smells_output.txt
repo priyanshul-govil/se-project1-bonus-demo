@@ -1,3 +1,10 @@
+#### FILE:  ./books-web-common/src/main/java/com/sismics/security/AnonymousPrincipal.java
+(1) Identified Design Smells:
+- The class AnonymousPrincipal implements IPrincipal interface but returns null for getId() and getEmail() methods. This is a violation of the Liskov Substitution Principle (LSP), a design smell referred to as "Refused Bequest".
+
+(2) Suggested Refactoring:
+- For the methods returning null (getId(), getEmail()), consider throwing an UnsupportedOperationException if these methods are not applicable for an AnonymousPrincipal.
+- If having methods that are not applicable to all implementations is a common case for classes implementing IPrincipal, consider revising the interface to better segregate its responsibilities. This might involve splitting it into multiple interfaces, following the Interface Segregation Principle (ISP).
 java
 package com.sismics.security;
 
@@ -78,3 +85,4 @@ public class AnonymousPrincipal implements IPrincipal {
         this.dateTimeZone = dateTimeZone;
     }
 }
+
