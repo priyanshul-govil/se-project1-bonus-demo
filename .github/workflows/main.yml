@@ -31,11 +31,11 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Upload smell detection result as artifact
-        uses: actions/upload-artifact@v2
-        with:
-            name: smells-output
-            path: .github/design-smells/smells_output.txt
+      # - name: Upload smell detection result as artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #       name: smells-output
+      #       path: .github/design-smells/smells_output.txt
 
   refactor-code:
     needs: [detect-design-smells]
@@ -62,21 +62,22 @@ jobs:
           git commit -m "Refactor code to address design smells"
           git push --set-upstream origin refactoring-branch
 
-      - name: Download smell detection result
-        uses: actions/download-artifact@v2
-        with:
-          name: smells-output
+      # - name: Download smell detection result
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: smells-output
 
-      - name: Read smell detection result
-        id: smells
-        run: echo "::set-output name=body::$(cat .github/design-smells/smells_output.txt)"
+      # - name: Read smell detection result
+      #   id: smells
+      #   run: echo "::set-output name=body::$(cat .github/design-smells/smells_output.txt)"
         
       - name: Create Pull Request
         uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_title: "Weekly Refactoring: Addressing Design Smells"
-          pr_body: "${{ steps.smells.outputs.body }}"
+          # pr_body: "${{ steps.smells.outputs.body }}"
+          pr_body: "testing123"
           pr_label: "refactoring"
           destination_branch: "main"
           source_branch: "refactoring-branch"
