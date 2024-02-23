@@ -1,37 +1,26 @@
+java
 package com.sismics.security;
 
 import org.joda.time.DateTimeZone;
 
 import java.util.Locale;
 
-/**
- * Anonymous principal.
- * 
- * @author jtremeaux
- */
 public class AnonymousPrincipal implements IPrincipal {
     public static final String ANONYMOUS = "anonymous";
-    
-    /**
-     * User locale.
-     */
+
     private Locale locale;
-    
-    /**
-     * User timezone.
-     */
     private DateTimeZone dateTimeZone;
-    
-    /**
-     * Constructor of AnonymousPrincipal.
-     */
+
     public AnonymousPrincipal() {
-        // NOP
+        // Assign default values for fields to represent an anonymous user instead of null
+        this.locale = Locale.getDefault();
+        this.dateTimeZone = DateTimeZone.getDefault();
     }
-    
+
     @Override
     public String getId() {
-        return null;
+        // Return anonymous identifier instead of null
+        return ANONYMOUS;
     }
 
     @Override
@@ -49,11 +38,6 @@ public class AnonymousPrincipal implements IPrincipal {
         return locale;
     }
 
-    /**
-     * Setter of locale.
-     *
-     * @param locale locale
-     */
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
@@ -63,17 +47,13 @@ public class AnonymousPrincipal implements IPrincipal {
         return dateTimeZone;
     }
 
-    @Override
-    public String getEmail() {
-        return null;
-    }
-    
-    /**
-     * Setter of dateTimeZone.
-     *
-     * @param dateTimeZone dateTimeZone
-     */
     public void setDateTimeZone(DateTimeZone dateTimeZone) {
         this.dateTimeZone = dateTimeZone;
+    }
+
+    @Override
+    public String getEmail() {
+        // As it's an anonymous principal, return a predefined value instead of null
+        return "anonymous@noreply.com";
     }
 }

@@ -1,0 +1,11 @@
+(1) Identified Design Smells: 
+
+- Data Class: The 'AnonymousPrincipal' class is a typical example of a Data Class design smell. It consists mainly of fields and the corresponding accessor methods (getters and setters) with no significant behavior.
+
+- Null Returns: The getId() and getEmail() methods return null, which can lead to Null Pointer Exceptions if not handled properly by the client code.
+
+(2) Suggested Refactoring:
+
+- Encapsulate Fields: Instead of exposing the fields via getters and setters, consider adding meaningful methods that manipulate the fields in ways that are relevant to your application's requirements.
+
+- Introduce Null Object: Instead of returning null in getId() and getEmail() methods, consider implementing the Null Object pattern. Create a special case of the User that represents an anonymous user, which would have a valid ID and email. For example, for getId() you could return "" (empty string) or "anonymous". This helps to prevent Null Pointer Exceptions.
