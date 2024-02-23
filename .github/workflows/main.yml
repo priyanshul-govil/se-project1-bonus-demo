@@ -26,7 +26,8 @@ jobs:
           # Install any other dependencies your scripts might need
 
       - name: Detect Design Smells
-        run: python .github/design-smells/detect_design_smells.py > .github/design-smells/smells_output.txt
+        # run: python .github/design-smells/detect_design_smells.py > .github/design-smells/smells_output.txt
+        run: python .github/design-smells/detect_design_smells.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 

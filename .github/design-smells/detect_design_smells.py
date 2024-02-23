@@ -71,6 +71,9 @@ def analyze_and_refactor_smells(file_path):
     # Code is between ``` and ``` in the response. Keep only that part.
     refactored_code = refactored_code.split("```")[1]
 
+    # Testing purposes: print refactored code
+    print(refactored_code)
+
     # Apply refactoring
     apply_refactoring(file_path, refactored_code)
 
@@ -82,6 +85,8 @@ def main(directory):
             if file.endswith(".java"):
                 file_path = os.path.join(root, file)
                 
+                print("#### FILE: ", file_path)
+
                 # Detect and refactor design smells
                 analyze_and_refactor_smells(file_path)
 
