@@ -30,16 +30,16 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Upload smell detection result as artifact
-        uses: actions/upload-artifact@v2
-        with:
-            name: smells-output
-            path: .github/design-smells/smells_output.txt
+      # - name: Upload smell detection result as artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #       name: smells-output
+      #       path: .github/design-smells/smells_output.txt
 
-      - name: Download smell detection result
-        uses: actions/download-artifact@v2
-        with:
-          name: smells-output
+      # - name: Download smell detection result
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: smells-output
 
       # - name: Read smell detection result
       #   id: smells
