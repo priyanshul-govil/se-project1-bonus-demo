@@ -1,8 +1,9 @@
+java
 package com.sismics.security;
 
 import org.joda.time.DateTimeZone;
-
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Anonymous principal.
@@ -30,8 +31,8 @@ public class AnonymousPrincipal implements IPrincipal {
     }
     
     @Override
-    public String getId() {
-        return null;
+    public Optional<String> getId() {
+        return Optional.empty();
     }
 
     @Override
@@ -64,8 +65,8 @@ public class AnonymousPrincipal implements IPrincipal {
     }
 
     @Override
-    public String getEmail() {
-        return null;
+    public Optional<String> getEmail() {
+        return Optional.empty();
     }
     
     /**
