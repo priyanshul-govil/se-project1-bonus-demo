@@ -1,0 +1,9 @@
+(1) Identified Design Smells: 
+- Null Object: The "getId()" and "getEmail()" methods return null, which is a smell as null values can lead to NullPointerExceptions.
+- Missing Abstraction: There's no encapsulation for the "locale" and "dateTimeZone" fields, exposing them directly through setters.
+- Data Class: Class only contains data fields and accessor methods with no significant behavior.
+
+(2) Suggested Refactoring:
+- For the Null Object issue, implement the Null Object pattern. Create a class that implements the IPrincipal interface, providing default behaviour for "getId()" and "getEmail()" methods.
+- For the Missing Abstraction issue, remove setters for "locale" and "dateTimeZone" and pass these values via the constructor or methods where they're needed.
+- To correct the Data Class smell, move any relevant behavior related to the "AnonymousPrincipal" itself into the class, such as locale and timezone handling functionalities.
