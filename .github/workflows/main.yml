@@ -51,13 +51,12 @@ jobs:
 
       - name: Configure Git
         run: |
+          git config --global init.defaultBranch main
           git config --global user.email "priyanshul.amity9i@gmail.com"
           git config --global user.name "GitHub Actions"
 
       - name: Create New Branch and Commit Changes
         run: |
-          git config --global init.defaultBranch main
-          git fetch
           git checkout -b refactoring-branch
           git add .
           git commit -m "Refactor code to address design smells"

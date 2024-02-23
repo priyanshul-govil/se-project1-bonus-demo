@@ -69,7 +69,10 @@ def analyze_and_refactor_smells(file_path):
     )
     refactored_code = response.choices[0].message.content
     # Code is between ``` and ``` in the response. Keep only that part.
-    refactored_code = refactored_code.split("```")[1]
+    try:
+        refactored_code = refactored_code.split("```")[1]
+    except IndexError:
+        pass
 
     # Testing purposes: print refactored code
     print(refactored_code)
