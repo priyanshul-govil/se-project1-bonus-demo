@@ -1,0 +1,80 @@
+name: Design Smell Detection and Refactoring Workflow
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs at 00:00 UTC every Sunday
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  detect-design-smells:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install openai
+          # Install any other dependencies your scripts might need
+
+      - name: Detect Design Smells
+        run: python .github/design-smells/detect_design_smells.py > .github/design-smells/smells_output.txt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Upload smell detection result as artifact
+        uses: actions/upload-artifact@v2
+        with:
+            name: smells-output
+            path: .github/design-smells/smells_output.txt
+
+  refactor-code:
+    needs: [detect-design-smells]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "priyanshul.amity9i@gmail.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Create New Branch and Commit Changes
+        run: |
+          git checkout -b refactoring-branch
+          git add .
+          git commit -m "Refactor code to address design smells"
+          git push origin refactoring-branch
+
+      - name: Download smell detection result
+        uses: actions/download-artifact@v2
+        with:
+          name: smells-output
+        
+      - name: Read smell detection result
+        id: smells
+        run: echo "::set-output name=body::$(cat smells_output.txt)"
+        
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "Weekly Refactoring: Addressing Design Smells"
+          pr_body: "${{ steps.smells.outputs.body }}"
+          pr_label: "refactoring"
+          destination_branch: "main"
+          source_branch: "refactoring-branch"
