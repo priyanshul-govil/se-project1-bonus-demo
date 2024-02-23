@@ -37,6 +37,11 @@ jobs:
       #       name: smells-output
       #       path: .github/design-smells/smells_output.txt
 
+      - name: Check for changes
+        run: |
+          git status
+          git diff
+
   refactor-code:
     needs: [detect-design-smells]
     runs-on: ubuntu-latest
