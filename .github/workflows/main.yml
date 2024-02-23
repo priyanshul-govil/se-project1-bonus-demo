@@ -47,7 +47,7 @@ jobs:
           git checkout -b refactoring-branch
           git add .
           git commit -m "Refactor code to address design smells"
-          git push --set-upstream origin/main refactoring-branch
+          git push --set-upstream origin refactoring-branch
 
   refactor-code:
     needs: [detect-design-smells]
