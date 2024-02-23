@@ -37,7 +37,7 @@ def analyze_and_refactor_smells(file_path):
         frequency_penalty=0,
         presence_penalty=0
     )
-    smells = response.choices[0].text
+    smells = response.choices[0].message['content']
     print(smells)
 
     """Get refactored code"""
@@ -67,7 +67,7 @@ def analyze_and_refactor_smells(file_path):
     frequency_penalty=0,
     presence_penalty=0
     )
-    refactored_code = response.choices[0].text
+    refactored_code = response.choices[0].message['content']
     # Code is between ``` and ``` in the response. Keep only that part.
     refactored_code = refactored_code.split("```")[1]
 
