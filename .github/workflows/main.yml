@@ -27,7 +27,6 @@ jobs:
 
       - name: Detect Design Smells
         run: python .github/design-smells/detect_design_smells.py > .github/design-smells/smells_output.txt
-        # run: python .github/design-smells/detect_design_smells.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
@@ -42,10 +41,11 @@ jobs:
         with:
           name: smells-output
 
-      - name: Read smell detection result
-        id: smells
-        run: echo "::set-output name=body::$(cat .github/design-smells/smells_output.txt)"
-
+      # - name: Read smell detection result
+      #   id: smells
+      #   run: |
+      #     echo "::set-output name=body::$(base64 -w 0 .github/design-smells/smells_output.txt)"
+      
       - name: Check for changes
         run: |
           git config --global init.defaultBranch main
@@ -58,14 +58,22 @@ jobs:
           git push --set-upstream origin refactoring-branch
 
       - name: Create Pull Request
-        uses: repo-sync/pull-request@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "Weekly Refactoring: Addressing Design Smells"
-          pr_body: "${{ steps.smells.outputs.body }}"
-          # pr_body: "testing123"
-          pr_label: "refactoring"
-          destination_branch: "main"
-          source_branch: "refactoring-branch"
+        run: |
+          PR_BODY=$(cat .github/design-smells/smells_output.txt)
+          echo "$PR_BODY"
+          # Use the GitHub CLI to create the pull request with the multi-line body
+          gh pr create --title "Weekly Refactoring: Addressing Design Smells" --body "$PR_BODY" --label "refactoring" --base main --head refactoring-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create Pull Request
+      #   uses: repo-sync/pull-request@v2
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     pr_title: "Weekly Refactoring: Addressing Design Smells"
+      #     pr_body: "${{ steps.smells.outputs.body | base64decode }}"
+      #     pr_label: "refactoring"
+      #     destination_branch: "main"
+      #     source_branch: "refactoring-branch"
 
       
