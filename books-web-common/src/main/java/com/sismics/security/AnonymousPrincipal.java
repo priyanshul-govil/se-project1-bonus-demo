@@ -1,3 +1,4 @@
+java
 package com.sismics.security;
 
 import org.joda.time.DateTimeZone;
@@ -5,30 +6,50 @@ import org.joda.time.DateTimeZone;
 import java.util.Locale;
 
 /**
+ * Abstract principal.
+ * 
+ * @author jtremeaux
+ */
+
+public abstract class AbstractPrincipal implements IPrincipal {
+
+    protected Locale locale;
+    protected DateTimeZone dateTimeZone;
+
+    protected AbstractPrincipal(Locale locale, DateTimeZone dateTimeZone) {
+        this.locale = locale;
+        this.dateTimeZone = dateTimeZone;
+    }
+
+    @Override
+    public boolean isAnonymous() {
+        return false;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    @Override
+    public DateTimeZone getDateTimeZone() {
+        return dateTimeZone;
+    }
+}
+
+/**
  * Anonymous principal.
  * 
  * @author jtremeaux
  */
-public class AnonymousPrincipal implements IPrincipal {
+public class AnonymousPrincipal extends AbstractPrincipal {
+
     public static final String ANONYMOUS = "anonymous";
-    
-    /**
-     * User locale.
-     */
-    private Locale locale;
-    
-    /**
-     * User timezone.
-     */
-    private DateTimeZone dateTimeZone;
-    
-    /**
-     * Constructor of AnonymousPrincipal.
-     */
-    public AnonymousPrincipal() {
-        // NOP
+
+    public AnonymousPrincipal(Locale locale, DateTimeZone dateTimeZone) {
+        super(locale, dateTimeZone);
     }
-    
+
     @Override
     public String getId() {
         return null;
@@ -45,35 +66,7 @@ public class AnonymousPrincipal implements IPrincipal {
     }
 
     @Override
-    public Locale getLocale() {
-        return locale;
-    }
-
-    /**
-     * Setter of locale.
-     *
-     * @param locale locale
-     */
-    public void setLocale(Locale locale) {
-        this.locale = locale;
-    }
-
-    @Override
-    public DateTimeZone getDateTimeZone() {
-        return dateTimeZone;
-    }
-
-    @Override
     public String getEmail() {
         return null;
-    }
-    
-    /**
-     * Setter of dateTimeZone.
-     *
-     * @param dateTimeZone dateTimeZone
-     */
-    public void setDateTimeZone(DateTimeZone dateTimeZone) {
-        this.dateTimeZone = dateTimeZone;
     }
 }

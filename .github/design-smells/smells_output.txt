@@ -1,0 +1,11 @@
+(1) Identified Design Smells: 
+
+- Rigidity: The class is hard-coded to return null for getId() and getEmail() methods, and true for isAnonymous(). This restricts the flexibility of the class.
+
+(2) Suggested Refactoring:
+
+- Introduce Abstract Class: Create an AbstractPrincipal class that provides default method implementations for common functionalities like isAnonymous(). This can allow flexibility for subclasses to override the default implementations if needed.
+
+- Create concrete classes for different types of Principals: Instead of hardcoding the return values for getId() and getEmail(), you can create different classes like AnonymousPrincipal, RegisteredPrincipal, and each class can return appropriate values.
+
+- Encapsulate fields that are not supposed to be changed: If the 'locale' and 'dateTimeZone' fields are not supposed to be changed after the object creation, you should remove the setter methods and add these fields as parameters to the constructor, making these fields final. This will ensure immutability of these fields.
