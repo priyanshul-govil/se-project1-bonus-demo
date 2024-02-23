@@ -1,0 +1,10 @@
+(1) Identified Design Smells:
+
+- Long Method: The methods "info()", "update()" and "log()" are quite long and are doing multiple tasks. This might make it difficult to understand and maintain in the future.
+- High Coupling: The class AppResource is highly dependent on the classes such as ConfigUtil, ValidationUtil, ConfigDao, and MemoryAppender. This high coupling can make it difficult to modify one class without affecting the other.
+
+(2) Suggested Refactoring:
+
+- Extract Method: For the long methods, we can extract some code blocks into separate methods. For instance, creating a separate method for formulating the JSON response in the "info()" method.
+- Move Method or Extract Class: The high coupling can be reduced by moving some methods to the classes that they are most interacting with. For example, the code block dealing with MemoryAppender in the "log()" method can be moved into the MemoryAppender class itself or into a new class.
+- Use Dependency Injection: The high coupling can also be reduced by using dependency injection, which would make the AppResource class able to use different implementations of its dependencies and make it more flexible for changes.

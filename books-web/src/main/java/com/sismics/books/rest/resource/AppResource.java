@@ -1,3 +1,4 @@
+java
 package com.sismics.books.rest.resource;
 
 import java.util.ArrayList;
@@ -33,106 +34,94 @@ import com.sismics.util.log4j.LogCriteria;
 import com.sismics.util.log4j.LogEntry;
 import com.sismics.util.log4j.MemoryAppender;
 
-/**
- * General app REST resource.
- * 
- * @author jtremeaux
- */
 @Path("/app")
 public class AppResource extends BaseResource {
-    /**
-     * Return the information about the application.
-     * 
-     * @return Response
-     * @throws JSONException
-     */
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response info() throws JSONException {
+        checkAuthentication();
+        
+        JSONObject response = formInfoJsonResponse();
+        
+        return Response.ok().entity(response).build();
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response update(@FormParam("api_key_google") String apiKeyGoogle) throws JSONException {
+        checkAuthentication();
+        checkBaseFunction(BaseFunction.ADMIN);
+        
+        updateConfig(apiKeyGoogle);
+        
+        JSONObject response = new JSONObject();
+        response.put("status", "ok");
+        return Response.ok().entity(response).build();
+    }
+
+    @GET
+    @Path("log")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response log(@QueryParam("level") String level,
+                        @QueryParam("tag") String tag,
+                        @QueryParam("message") String message,
+                        @QueryParam("limit") Integer limit,
+                        @QueryParam("offset") Integer offset) throws JSONException {
+        checkAuthentication();
+        checkBaseFunction(BaseFunction.ADMIN);
+
+        MemoryAppender memoryAppender = getAppender();
+        
+        PaginatedList<LogEntry> paginatedList = findLogs(level, tag, message, memoryAppender, limit, offset);
+        
+        JSONObject response = createLogJsonResponse(paginatedList);
+
+        return Response.ok().entity(response).build();
+    }
+
+    private void checkAuthentication() {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
-        
+    }
+
+    private JSONObject formInfoJsonResponse() throws JSONException {
         ResourceBundle configBundle = ConfigUtil.getConfigBundle();
         String currentVersion = configBundle.getString("api.current_version");
         String minVersion = configBundle.getString("api.min_version");
 
         JSONObject response = new JSONObject();
-        
-        // General data
         response.put("current_version", currentVersion.replace("-SNAPSHOT", ""));
         response.put("min_version", minVersion);
         response.put("total_memory", Runtime.getRuntime().totalMemory());
         response.put("free_memory", Runtime.getRuntime().freeMemory());
-        
-        // Specific data
         response.put("api_key_google", ConfigUtil.getConfigStringValue(ConfigType.API_KEY_GOOGLE));
         
-        return Response.ok().entity(response).build();
+        return response;
     }
-    
-    /**
-     * Update application configuration.
-     * 
-     * @return Response
-     * @throws JSONException
-     */
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response update(
-            @FormParam("api_key_google") String apiKeyGoogle) throws JSONException {
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
-        checkBaseFunction(BaseFunction.ADMIN);
-        
-        // Validate input data
+
+    private void updateConfig(String apiKeyGoogle) {
         apiKeyGoogle = ValidationUtil.validateLength(apiKeyGoogle, "api_key_google", 1, 250, false);
         
         ConfigDao configDao = new ConfigDao();
         configDao.getById(ConfigType.API_KEY_GOOGLE).setValue(apiKeyGoogle);
         
         AppContext.getInstance().getBookDataService().initConfig();
-        
-        JSONObject response = new JSONObject();
-        response.put("status", "ok");
-        return Response.ok().entity(response).build();
     }
     
-    /**
-     * Retrieve the application logs.
-     * 
-     * @param level Filter on logging level
-     * @param tag Filter on logger name / tag
-     * @param message Filter on message
-     * @param limit Page limit
-     * @param offset Page offset
-     * @return Response
-     * @throws JSONException
-     */
-    @GET
-    @Path("log")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response log(
-            @QueryParam("level") String level,
-            @QueryParam("tag") String tag,
-            @QueryParam("message") String message,
-            @QueryParam("limit") Integer limit,
-            @QueryParam("offset") Integer offset) throws JSONException {
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
-        checkBaseFunction(BaseFunction.ADMIN);
-
-        // Get the memory appender
+    private MemoryAppender getAppender() {
         Logger logger = Logger.getRootLogger();
         Appender appender = logger.getAppender("MEMORY");
         if (!(appender instanceof MemoryAppender)) {
             throw new ServerException("ServerError", "MEMORY appender not configured");
         }
-        MemoryAppender memoryAppender = (MemoryAppender) appender;
-        
-        // Find the logs
+        return (MemoryAppender) appender;
+    }
+
+    private PaginatedList<LogEntry> findLogs(String level, String tag, String message, 
+                                            MemoryAppender memoryAppender, Integer limit, 
+                                            Integer offset) {
         LogCriteria logCriteria = new LogCriteria();
         logCriteria.setLevel(StringUtils.stripToNull(level));
         logCriteria.setTag(StringUtils.stripToNull(tag));
@@ -140,6 +129,11 @@ public class AppResource extends BaseResource {
         
         PaginatedList<LogEntry> paginatedList = PaginatedLists.create(limit, offset);
         memoryAppender.find(logCriteria, paginatedList);
+
+        return paginatedList;
+    }
+
+    private JSONObject createLogJsonResponse(PaginatedList<LogEntry> paginatedList) throws JSONException {
         JSONObject response = new JSONObject();
         List<JSONObject> logs = new ArrayList<>();
         for (LogEntry logEntry : paginatedList.getResultList()) {
@@ -152,7 +146,7 @@ public class AppResource extends BaseResource {
         }
         response.put("total", paginatedList.getResultCount());
         response.put("logs", logs);
-        
-        return Response.ok().entity(response).build();
+
+        return response;
     }
 }
