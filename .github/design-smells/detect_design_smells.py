@@ -4,7 +4,6 @@ import openai
 
 # Assuming your OpenAI API key is set in your environment variables
 openai.api_key = os.getenv("OPENAI_API_KEY")
-client = openai.Client()
 
 
 def apply_refactoring(file_path, refactored_code):
@@ -19,7 +18,7 @@ def analyze_and_refactor_smells(file_path):
         code_content = file.read()
 
     """Get design smells"""
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
     model="gpt-4",
     messages=[
             {
@@ -37,11 +36,11 @@ def analyze_and_refactor_smells(file_path):
         frequency_penalty=0,
         presence_penalty=0
     )
-    smells = response.choices[0].text
+    smells = response.choices[0].message.content
     print(smells)
 
     """Get refactored code"""
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
     model="gpt-4",
     messages=[
         {
@@ -67,7 +66,7 @@ def analyze_and_refactor_smells(file_path):
     frequency_penalty=0,
     presence_penalty=0
     )
-    refactored_code = response.choices[0].text
+    refactored_code = response.choices[0].message.content
     # Code is between ``` and ``` in the response. Keep only that part.
     refactored_code = refactored_code.split("```")[1]
 
