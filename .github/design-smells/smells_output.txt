@@ -1,0 +1,74 @@
+#### FILE:  ./books-web-common/src/main/java/com/sismics/security/AnonymousPrincipal.java
+(1) Identified Design Smells:
+
+a. Rigidity: The AnonymousPrincipal class is not flexible because it returns hard-coded values in some of its methods. This makes the code difficult to modify as changes in the requirements could require changes in several places in the code.
+
+b. Inappropriate Intimacy: The class provides setter methods for 'locale' and 'dateTimeZone' properties which could lead to inappropriate object state manipulation by external classes.
+
+(2) Suggested Refactoring:
+
+a. For Rigidity: Instead of returning hard-coded values in the methods 'isAnonymous' and 'getName', consider defining these values as private members of the class. This would make this class more flexible and easier to modify in case of changes in requirements.
+
+b. For Inappropriate Intimacy: Consider removing the public setter methods 'setLocale' and 'setDateTimeZone' if they are not necessary. If the properties need to be mutable, consider doing it in a controlled manner by providing methods that perform specific modifications, rather than exposing the entire field for modification. Also, consider employing the principle of encapsulation more rigorously to maintain the integrity of data.
+package com.sismics.security;
+
+import org.joda.time.DateTimeZone;
+
+import java.util.Locale;
+
+/**
+ * Anonymous principal.
+ * 
+ * @author jtremeaux
+ */
+public class AnonymousPrincipal implements IPrincipal {
+    private static final String ANONYMOUS = "anonymous";
+    private static final boolean IS_ANONYMOUS = true;
+    
+    /**
+     * User locale.
+     */
+    private Locale locale;
+    
+    /**
+     * User timezone.
+     */
+    private DateTimeZone dateTimeZone;
+    
+    /**
+     * Constructor of AnonymousPrincipal.
+     */
+    public AnonymousPrincipal() {
+        // NOP
+    }
+    
+    @Override
+    public String getId() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return ANONYMOUS;
+    }
+
+    @Override
+    public boolean isAnonymous() {
+        return IS_ANONYMOUS;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    @Override
+    public DateTimeZone getDateTimeZone() {
+        return dateTimeZone;
+    }
+
+    @Override
+    public String getEmail() {
+        return null;
+    }
+}

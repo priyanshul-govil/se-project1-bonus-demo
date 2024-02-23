@@ -10,7 +10,8 @@ import java.util.Locale;
  * @author jtremeaux
  */
 public class AnonymousPrincipal implements IPrincipal {
-    public static final String ANONYMOUS = "anonymous";
+    private static final String ANONYMOUS = "anonymous";
+    private static final boolean IS_ANONYMOUS = true;
     
     /**
      * User locale.
@@ -41,21 +42,12 @@ public class AnonymousPrincipal implements IPrincipal {
 
     @Override
     public boolean isAnonymous() {
-        return true;
+        return IS_ANONYMOUS;
     }
 
     @Override
     public Locale getLocale() {
         return locale;
-    }
-
-    /**
-     * Setter of locale.
-     *
-     * @param locale locale
-     */
-    public void setLocale(Locale locale) {
-        this.locale = locale;
     }
 
     @Override
@@ -66,14 +58,5 @@ public class AnonymousPrincipal implements IPrincipal {
     @Override
     public String getEmail() {
         return null;
-    }
-    
-    /**
-     * Setter of dateTimeZone.
-     *
-     * @param dateTimeZone dateTimeZone
-     */
-    public void setDateTimeZone(DateTimeZone dateTimeZone) {
-        this.dateTimeZone = dateTimeZone;
     }
 }
