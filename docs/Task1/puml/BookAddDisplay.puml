@@ -1,0 +1,431 @@
+@startuml book
+
+enum BaseFunction {
+    ADMIN
+}
+
+abstract class BaseResource {
+    #request: HttpServerletRequest
+    #appKey: String
+    #principal: IPrincipal
+    #authenticate(): boolean
+    #checkBaseFunction(BaseFunction baseFunction): void
+    #hasBaseFunction(BaseFunction baseFunction): boolean
+}
+
+class BookResource extends BaseResource {
+    + add(isbn: String): Response
+    + delete(userBookId: String): Response
+    + add(title: String, subtitle: String, author: String, description: String, isbn10: String,
+        isbn13: String, pageCount: Long, language: String, publishDateStr: String, tagList: List<String>): Response
+    + update(userBookId: String, title: String, subtitle: String, author: String, description: String, isbn10: String,
+        isbn13: String, pageCount: Long, language: String, publishDateStr: String, tagList: List<String>): Response
+    + get(userBookId: String): Response
+    + cover(userBookId: String): Response
+    + updateCover(userBookId: String, imageUrl: String): Response
+    + list(limit: Integer, offset: Integer, sortColumn: Integer, asc: Boolean, search: String, read: Boolean, tagName: String): Response
+    + importFile(fileBodyPart: FormDataBodyPart): Response
+    + read(userBookId: String, read: boolean): Response
+    }
+
+
+
+
+
+class Book {
+    - id: String
+    - title: String
+    - subtitle: String
+    - author: String
+    - description: String
+    - isbn10: String
+    - isbn13: String
+    - pageCount: Long
+    - language: String
+    - publishDate: Date
+
+    + getId(): String
+    + setId(id: String): void
+    + getTitle(): String
+    + setTitle(title: String): void
+    + getSubtitle(): String
+    + setSubtitle(subtitle: String): void
+    + getAuthor(): String
+    + setAuthor(author: String): void
+    + getDescription(): String
+    + setDescription(description: String): void
+    + getIsbn10(): String
+    + setIsbn10(isbn10: String): void
+    + getIsbn13(): String
+    + setIsbn13(isbn13: String): void
+    + getPageCount(): Long
+    + setPageCount(pageCount: Long): void
+    + getLanguage(): String
+    + setLanguage(language: String): void
+    + getPublishDate(): Date
+    + setPublishDate(publishDate: Date): void
+    + toString(): String
+}
+
+
+class UserBook {
+    - id: String
+    - bookId: String
+    - userId: String
+    - createDate: Date
+    - deleteDate: Date
+    - readDate: Date
+    
+    + getId(): String
+    + setId(id: String): void
+    + getBookId(): String
+    + setBookId(bookId: String): void
+    + getUserId(): String
+    + setUserId(userId: String): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + getReadDate(): Date
+    + setReadDate(readDate: Date): void
+    + hashCode(): int
+    + equals(obj: Object): boolean
+    + toString(): String
+}
+
+class Tag {
+    - id: String
+    - name: String
+    - userId: String
+    - createDate: Date
+    - deleteDate: Date
+    - color: String
+    + getId(): String
+    + setId(id: String): void
+    + getUserId(): String
+    + setUserId(userId: String): void
+    + getName(): String
+    + setName(name: String): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getColor(): String
+    + setColor(color: String): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + toString(): String
+}
+
+class User {
+    - id: String
+    - localeId: String
+    - roleId: String
+    - username: String
+    - password: String
+    - email: String
+    - theme: String
+    - firstConnection: boolean
+    - createDate: Date
+    - deleteDate: Date
+    + getId(): String
+    + setId(id: String): void
+    + getLocaleId(): String
+    + setLocaleId(localeId: String): void
+    + getRoleId(): String
+    + setRoleId(roleId: String): void
+    + getUsername(): String
+    + setUsername(username: String): void
+    + getPassword(): String
+    + setPassword(password: String): void
+    + getEmail(): String
+    + setEmail(email: String): void
+    + getTheme(): String
+    + setTheme(theme: String): void
+    + isFirstConnection(): boolean
+    + setFirstConnection(firstConnection: boolean): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + toString(): String
+}
+
+
+
+
+class UserBookDao {
+    + create(userBook: UserBook): String
+    + delete(id: String): void
+    + getUserBook(userBookId: String, userId: String): UserBook
+    + getUserBook(userBookId: String): UserBook
+    + getByBook(bookId: String, userId: String): UserBook
+    + findByCriteria(paginatedList: PaginatedList<UserBookDto>, criteria: UserBookCriteria, sortCriteria: SortCriteria): void
+}
+
+class BookDao {
+    + create(book: Book): String
+    + getById(id: String): Book
+    + getByIsbn(isbn: String): Book
+}
+
+class TagDao {
+    + getById(id: String): Tag
+    + getByUserId(userId: String): List<Tag>
+    + updateTagList(userBookId: String, tagIdSet: Set<String>): void
+    + getByUserBookId(userBookId: String): List<TagDto>
+    + create(tag: Tag): String
+    + getByName(userId: String, name: String): Tag
+    + getByTagId(userId: String, tagId: String): Tag
+    + delete(tagId: String): void
+    + findByName(userId: String, name: String): List<Tag>
+}
+
+
+
+class AppContext {
+    - instance: AppContext
+    - eventBus: EventBus
+    - asyncEventBus: EventBus
+    - importEventBus: EventBus
+    - bookDataService: BookDataService
+    - facebookService: FacebookService
+    - asyncExecutorList: List<ExecutorService>
+    + getInstance(): AppContext
+    - resetEventBus(): void
+    - getInstance(): AppContext
+    - newAsyncEventBus(): EventBus
+    + getEventBus(): EventBus
+    + getAsyncEventBus(): EventBus
+    + getImportEventBus(): EventBus
+    + getBookDataService(): BookDataService
+    + getFacebookService(): FacebookService
+}
+
+
+
+
+
+
+class BookDataService {
+    - log: Logger
+    - GOOGLE_BOOKS_SEARCH_FORMAT: String
+    - OPEN_LIBRARY_FORMAT: String
+    - executor: ExecutorService
+    - googleRateLimiter: RateLimiter
+    - openLibraryRateLimiter: RateLimiter
+    - apiKeyGoogle: String
+    - formatter: DateTimeFormatter
+    + startUp(): void
+    - initConfig(): void
+    + searchBook(rawIsbn: String): Book
+    - searchBookWithGoogle(isbn: String): Book
+    - searchBookWithOpenLibrary(isbn: String): Book
+    + downloadThumbnail(book: Book, imageUrl: String): void
+    + shutDown(): void
+}
+
+class FacebookService {
+    - facebookAppId: String
+    - facebookAppSecret: String
+    - log: Logger
+    + startUp(): void
+    + shutDown(): void
+    + runOneIteration(): void
+    + getExtendedAccessToken(accessToken: String): String
+    + validatePermission(accessToken: String): void
+    + synchronizeContact(accessToken: String, userId: String): void
+    + updateUserData(accessToken: String, userApp: UserApp): void
+    + publishAction(userBook: UserBook): void
+}
+
+
+
+
+interface IPrincipal {
+    + isAnonymous(): boolean
+    + getId(): String
+    + getLocale(): Locale
+    + getDateTimeZone(): DateTimeZone
+    + getEmail(): String
+}
+
+class UserPrincipal {
+    - id: String
+    - name: String
+    - locale: Locale
+    - dateTimeZone: DateTimeZone
+    - email: String
+    - baseFunctionSet: Set<String>
+    + UserPrincipal(id: String, name: String)
+    + isAnonymous(): boolean
+    + getId(): String
+    + setId(id: String): void
+    + getName(): String
+    + setName(name: String): void
+    + getLocale(): Locale
+    + setLocale(locale: Locale): void
+    + getDateTimeZone(): DateTimeZone
+    + setDateTimeZone(dateTimeZone: DateTimeZone): void
+    + getEmail(): String
+    + setEmail(email: String): void
+    + getBaseFunctionSet(): Set<String>
+    + setBaseFunctionSet(baseFunctionSet: Set<String>): void
+}
+
+
+
+class ValidationUtil {
+    - EMAIL_PATTERN: Pattern
+    - HTTP_URL_PATTERN: Pattern
+    - ALPHANUMERIC_PATTERN: Pattern
+    + validateRequired(s: Object, name: String): void
+    + validateLength(s: String, name: String, lengthMin: Integer, lengthMax: Integer, nullable: boolean): String
+    + validateLength(s: String, name: String, lengthMin: Integer, lengthMax: Integer): String
+    + validateStringNotBlank(s: String, name: String): String
+    + validateHexColor(s: String, name: String, nullable: boolean): void
+    + validateEmail(s: String, name: String): void
+    + validateHttpUrl(s: String, name: String): String
+    + validateAlphanumeric(s: String, name: String): void
+    + validateDate(s: String, name: String, nullable: boolean): Date
+    + validateLocale(localeId: String, name: String, nullable: boolean): String
+    + validateTheme(themeId: String, name: String, nullable: boolean): String
+}
+
+
+
+class PaginatedList<T> {
+    - limit: int
+    - offset: int
+    - resultCount: int
+    - resultList: List<T>
+    + PaginatedList(pageSize: int, offset: int)
+    + getResultCount(): int
+    + setResultCount(resultCount: int): void
+    + getResultList(): List<T>
+    + setResultList(resultList: List<T>): void
+    + getLimit(): int
+    + getOffset(): int
+}
+
+class PaginatedLists {
+    - DEFAULT_PAGE_SIZE: int
+    - MAX_PAGE_SIZE: int
+    + create(pageSize: Integer, offset: Integer): PaginatedList<E>
+    + create(): PaginatedList<E>
+    + executeCountQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam): void
+    + executeResultQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam): List<Object[]>
+    + executePaginatedQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam): List<Object[]>
+    + executePaginatedQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam, sortCriteria: SortCriteria): List<Object[]>
+}
+
+class SortCriteria {
+    - column: int
+    - asc: boolean
+    + SortCriteria(column: Integer, asc: Boolean)
+    + getColumn(): int
+    + isAsc(): boolean
+}
+
+
+
+
+
+class UserBookDto {
+    - id: String
+    - title: String
+    - subtitle: String
+    - author: String
+    - language: String
+    - publishTimestamp: Long
+    - createTimestamp: Long
+    - readTimestamp: Long
+    + getId(): String
+    + setId(id: String): void
+    + getTitle(): String
+    + setTitle(title: String): void
+    + getSubtitle(): String
+    + setSubtitle(subtitle: String): void
+    + getAuthor(): String
+    + setAuthor(author: String): void
+    + getLanguage(): String
+    + setLanguage(language: String): void
+    + getPublishTimestamp(): Long
+    + setPublishTimestamp(publishTimestamp: Long): void
+    + getCreateTimestamp(): Long
+    + setCreateTimestamp(createTimestamp: Long): void
+    + getReadTimestamp(): Long
+    + setReadTimestamp(readTimestamp: Long): void
+}
+
+
+
+class UserBookCriteria {
+    - userId: String
+    - search: String
+    - read: Boolean
+    - tagIdList: List<String>
+    + getUserId(): String
+    + setUserId(userId: String): void
+    + getSearch(): String
+    + setSearch(search: String): void
+    + getTagIdList(): List<String>
+    + setTagIdList(tagIdList: List<String>): void
+    + getRead(): Boolean
+    + setRead(read: Boolean): void
+}
+
+
+
+class BookImportedEvent {
+    - user: User
+    - importFile: File
+    + getUser(): User
+    + setUser(User user): void
+    + getImportFile(): File
+    + setImportFile(File importFile): void
+    + toString(): String
+}
+
+
+BookResource "1" -- "0..*" BookDao: uses >
+BookResource "1" -- "0..*" UserBookDao: uses >
+BookResource "1" -- "0..*" ValidationUtil: uses >
+BookResource "1" -- "0..*" SortCriteria: uses >
+BookResource "1" -- "0..*" UserBookCriteria: uses >
+BookResource "1" -- "0..*" TagDao: uses >
+BookResource "1" -- "1" AppContext: interactWith 
+BookResource "1" -- "0..*" PaginatedLists: uses
+BookResource "1" -- "1" IPrincipal: interactsWith >
+BookResource "1" -- "0..*" BookImportedEvent: intiates >
+
+BaseResource "1" -- "1" UserPrincipal: uses >
+BaseResource "1" -- "1" IPrincipal: uses >
+BaseResource "1" -- "1" BaseFunction: uses >
+
+UserBookDao "1" -- "1" UserBook: access >
+UserBookDao "1" -- "1" UserBookCriteria: uses >
+UserBookDao "1" -- "1" SortCriteria: uses >
+UserBookDao "1" -- "1" PaginatedList: uses >
+UserBookDao "1" -- "0..*" UserBookDto: intiates >
+
+UserBookDto "1" -- "1" UserBook: correspondsTo >    
+UserBookDto "1" -- "1" Book: correspondsTo >
+UserBookDto "1" -- "1" User: correspondsTo >
+
+UserBook "1" *-- "1" Book: correspondsTo
+UserBook "1" *-- "1" User: correspondsTo
+
+BookDao "1" -- "0..*" Book: access >
+
+PaginatedList "1" o-- "0..*" UserBookDto: contains >
+PaginatedList "1" -- "1" PaginatedLists: returns <
+
+TagDao "1" -- "0..*" Tag: access >
+TagDao "0..*" -- "1" UserBook: intiates <
+
+UserBookCriteria "1" -- "1" User: correspondsTo >
+UserBookCriteria "1" -- "0..*" Tag: contains >
+
+AppContext "1" -- "1" BookDataService: uses >
+AppContext "1" -- "1" FacebookService: uses >
+
+@enduml

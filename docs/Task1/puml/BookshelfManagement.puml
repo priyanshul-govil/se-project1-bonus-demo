@@ -1,0 +1,282 @@
+@startuml tags
+
+
+enum BaseFunction {
+    ADMIN
+}
+
+abstract class BaseResource {
+    #request: HttpServerletRequest
+    #appKey: String
+    #principal: IPrincipal
+    #authenticate(): boolean
+    #checkBaseFunction(BaseFunction baseFunction): void
+    #hasBaseFunction(BaseFunction baseFunction): boolean
+}
+
+class TagResource extends BaseResource{
+    + list(): Response
+    + add(name: String, color: String): Response
+    + update(id: String, name: String, color: String): Response
+    + delete(tagId: String): Response
+}
+
+
+
+interface IPrincipal {
+    + isAnonymous(): boolean
+    + getId(): String
+    + getLocale(): Locale
+    + getDateTimeZone(): DateTimeZone
+    + getEmail(): String
+}
+
+class UserPrincipal {
+    - id: String
+    - name: String
+    - locale: Locale
+    - dateTimeZone: DateTimeZone
+    - email: String
+    - baseFunctionSet: Set<String>
+    + UserPrincipal(id: String, name: String)
+    + isAnonymous(): boolean
+    + getId(): String
+    + setId(id: String): void
+    + getName(): String
+    + setName(name: String): void
+    + getLocale(): Locale
+    + setLocale(locale: Locale): void
+    + getDateTimeZone(): DateTimeZone
+    + setDateTimeZone(dateTimeZone: DateTimeZone): void
+    + getEmail(): String
+    + setEmail(email: String): void
+    + getBaseFunctionSet(): Set<String>
+    + setBaseFunctionSet(baseFunctionSet: Set<String>): void
+}
+
+
+class TagDao {
+    + getById(id: String): Tag
+    + getByUserId(userId: String): List<Tag>
+    + updateTagList(userBookId: String, tagIdSet: Set<String>): void
+    + getByUserBookId(userBookId: String): List<TagDto>
+    + create(tag: Tag): String
+    + getByName(userId: String, name: String): Tag
+    + getByTagId(userId: String, tagId: String): Tag
+    + delete(tagId: String): void
+    + findByName(userId: String, name: String): List<Tag>
+}
+
+
+
+class Tag {
+    - id: String
+    - name: String
+    - userId: String
+    - createDate: Date
+    - deleteDate: Date
+    - color: String
+    + getId(): String
+    + setId(id: String): void
+    + getUserId(): String
+    + setUserId(userId: String): void
+    + getName(): String
+    + setName(name: String): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getColor(): String
+    + setColor(color: String): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + toString(): String
+}
+
+class UserBookTag {
+    - serialVersionUID: long
+    - id: String
+    - userBookId: String
+    - tagId: String
+    + getId(): String
+    + setId(id: String): void
+    + getUserBookId(): String
+    + setUserBookId(userBookId: String): void
+    + getTagId(): String
+    + setTagId(tagId: String): void
+    + hashCode(): int
+    + equals(obj: Object): boolean
+    + toString(): String
+}
+
+class User {
+    - id: String
+    - localeId: String
+    - roleId: String
+    - username: String
+    - password: String
+    - email: String
+    - theme: String
+    - firstConnection: boolean
+    - createDate: Date
+    - deleteDate: Date
+    + getId(): String
+    + setId(id: String): void
+    + getLocaleId(): String
+    + setLocaleId(localeId: String): void
+    + getRoleId(): String
+    + setRoleId(roleId: String): void
+    + getUsername(): String
+    + setUsername(username: String): void
+    + getPassword(): String
+    + setPassword(password: String): void
+    + getEmail(): String
+    + setEmail(email: String): void
+    + getTheme(): String
+    + setTheme(theme: String): void
+    + isFirstConnection(): boolean
+    + setFirstConnection(firstConnection: boolean): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + toString(): String
+}
+
+class Book {
+    - id: String
+    - title: String
+    - subtitle: String
+    - author: String
+    - description: String
+    - isbn10: String
+    - isbn13: String
+    - pageCount: Long
+    - language: String
+    - publishDate: Date
+
+    + getId(): String
+    + setId(id: String): void
+    + getTitle(): String
+    + setTitle(title: String): void
+    + getSubtitle(): String
+    + setSubtitle(subtitle: String): void
+    + getAuthor(): String
+    + setAuthor(author: String): void
+    + getDescription(): String
+    + setDescription(description: String): void
+    + getIsbn10(): String
+    + setIsbn10(isbn10: String): void
+    + getIsbn13(): String
+    + setIsbn13(isbn13: String): void
+    + getPageCount(): Long
+    + setPageCount(pageCount: Long): void
+    + getLanguage(): String
+    + setLanguage(language: String): void
+    + getPublishDate(): Date
+    + setPublishDate(publishDate: Date): void
+    + toString(): String
+}
+
+
+class UserBook {
+    - id: String
+    - bookId: String
+    - userId: String
+    - createDate: Date
+    - deleteDate: Date
+    - readDate: Date
+    
+    + getId(): String
+    + setId(id: String): void
+    + getBookId(): String
+    + setBookId(bookId: String): void
+    + getUserId(): String
+    + setUserId(userId: String): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + getReadDate(): Date
+    + setReadDate(readDate: Date): void
+    + hashCode(): int
+    + equals(obj: Object): boolean
+    + toString(): String
+}
+
+
+
+class ValidationUtil {
+    - EMAIL_PATTERN: Pattern
+    - HTTP_URL_PATTERN: Pattern
+    - ALPHANUMERIC_PATTERN: Pattern
+    + validateRequired(s: Object, name: String): void
+    + validateLength(s: String, name: String, lengthMin: Integer, lengthMax: Integer, nullable: boolean): String
+    + validateLength(s: String, name: String, lengthMin: Integer, lengthMax: Integer): String
+    + validateStringNotBlank(s: String, name: String): String
+    + validateHexColor(s: String, name: String, nullable: boolean): void
+    + validateEmail(s: String, name: String): void
+    + validateHttpUrl(s: String, name: String): String
+    + validateAlphanumeric(s: String, name: String): void
+    + validateDate(s: String, name: String, nullable: boolean): Date
+    + validateLocale(localeId: String, name: String, nullable: boolean): String
+    + validateTheme(themeId: String, name: String, nullable: boolean): String
+}
+
+
+
+interface IPrincipal {
+    + isAnonymous(): boolean
+    + getId(): String
+    + getLocale(): Locale
+    + getDateTimeZone(): DateTimeZone
+    + getEmail(): String
+}
+
+
+
+class ThreadLocalContext {
+    - entityManager: EntityManager
+    + threadLocalContext: ThreadLocal<ThreadLocalContext>
+    + get(): ThreadLocalContext
+    + cleanup(): void
+    + isInTransactionalContext(): boolean
+    + getEntityManager(): EntityManager
+    + setEntityManager(entityManager: EntityManager): void
+}
+
+
+
+class TagDto {
+    - id: String
+    - name: String
+    - color: String
+    + getId(): String
+    + setId(id: String): void
+    + getName(): String
+    + setName(name: String): void
+    + getColor(): String
+    + setColor(color: String): void
+}
+
+
+TagResource "1" -- "0..*" TagDao : uses >
+TagResource "1" -- "0..*" Tag: manages >
+TagResource "1" -- "0..*" ValidationUtil: manages >
+
+TagDao "1" -- "0..*" Tag: access >
+TagDao "1" -- "0..*" TagDto: manages >
+TagDao "1" -- "1" ThreadLocalContext: uses >
+TagDao "1" -- "1" UserBookTag: associatedWith >
+TagDao "1" -- "1" UserBook: associatedWith >
+
+BaseResource "1" -- "1" IPrincipal: uses >
+BaseResource "1" -- "1" UserPrincipal: uses >
+
+UserBook "1" *-- "1" Book: correspondsTo
+UserBook "1" *-- "1" User: correspondsTo
+
+UserBookTag "1" *--	"1" UserBook: correspondsTo
+UserBookTag "1" *--	"1" Tag: correspondsTo
+
+BaseResource "1" -- "1" BaseFunction: uses >
+
+@enduml

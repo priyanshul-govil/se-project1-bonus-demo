@@ -1,0 +1,306 @@
+@startuml user-management-uml
+
+' books-web-common
+
+interface IPrincipal {
+    +isAnonymous(): boolean
+    +getId(): String
+    +getLocale(): Locale
+    +getDateTimeZone(): DateTimeZone
+    +getEmail(): String
+}
+
+class UserPrincipal implements IPrincipal {
+    -id: String
+    -name: String
+    -locale: Locale
+    -dateTimeZone: DateTimeZone
+    -email: String
+    -baseFunctionSet: Set<String>
+
+    +UserPrincipal(String id, String name): void
+    +isAnonymous(): boolean
+    +getId(): String
+    +setId(String id): void
+    +getName(): String
+    +setName(String name): void
+    +getLocale(): Locale
+    +setLocale(Locale locale): void
+    +getDateTimeZone(): DateTimeZone
+    +setDateTimeZone(DateTimeZone dateTimeZone): void
+    +getEmail(): String
+    +setEmail(String email): void
+    +getBaseFunctionSet(): Set<String>
+    +setBaseFunctionSet(Set<String> baseFunctionSet): void
+}
+
+
+class ClientException {
+    {static} - serialVersionUID: long
+    {static} - log: Logger
+
+    + ClientException(type: String, message: String, e: Exception)
+    + ClientException(type: String, message: String)
+}
+
+class ForbiddenClientException {
+    {static} - serialVersionUID: long
+
+    + ForbiddenClientException()
+}
+
+class ServerException {
+    {static} - serialVersionUID: long
+
+    + ServerException(type: String, message: String, e: Exception)
+    + ServerException(type: String, message: String)
+}
+
+
+class ValidationUtil {
+    {static} - EMAIL_PATTERN: Pattern
+    {static} - HTTP_URL_PATTERN: Pattern
+    {static} - ALPHANUMERIC_PATTERN: Pattern
+
+    {static} + validateRequired(s: Object, name: String): void
+    {static} + validateLength(s: String, name: String, lengthMin: Integer, lengthMax: Integer, nullable: boolean): String
+}
+
+
+class TokenBasedSecurityFilter {
+    {static} - log: Logger
+    {static} + COOKIE_NAME: String 
+    {static} + PRINCIPAL_ATTRIBUTE: String 
+    {static} + TOKEN_LONG_LIFETIME: int
+    {static} + TOKEN_SESSION_LIFETIME: int
+
+    + init(filterConfig: FilterConfig): void
+    + destroy(): void
+    + doFilter(req: ServletRequest, response: ServletResponse, filterChain: FilterChain): void
+    - isTokenExpired(authenticationToken: AuthenticationToken): boolean
+    - injectAuthenticatedUser(request: HttpServletRequest, user: User): void
+    - injectAnonymousUser(request: HttpServletRequest): void
+}
+
+
+' books-web
+
+enum BaseFunction {
+    ADMIN
+}
+
+
+abstract class BaseResource {
+    #request: HttpServerletRequest
+    #appKey: String
+    #principal: IPrincipal
+
+    #authenticate(): boolean
+    #checkBaseFunction(BaseFunction baseFunction): void
+    #hasBaseFunction(BaseFunction baseFunction): boolean
+}
+
+class UserResource extends BaseResource {
+    +register(username: String, password: String, localeId: String, email: String): Response
+    +update(password: String, email: String, themeId: String, localeId: String, firstConnection: Boolean): Response
+    +update(username: String, password: String, email: String, themeId: String, localeId: String): Response
+    +checkUsername(username: String): Response
+    +login(username: String, password: String, longLasted: boolean): Response
+    +logout(): Response
+    +delete(): Response
+    +delete(username: String): Response
+    +info(): Response
+    +view(username: String): Response
+    +list(limit: Integer, offset: Integer, sortColumn: Integer, asc: Boolean): Response
+    +session(): Response
+    +deleteSession(): Response
+}
+
+
+' books-core
+
+class Constants {
+    +DEFAULT_LOCALE_ID: String = "en"
+    +DEFAULT_TIMEZONE_ID: String = "Europe/London"
+    +DEFAULT_THEME_ID: String = "default.less"
+    +DEFAULT_ADMIN_PASSWORD: String = "$2a$05$6Ny3TjrW3aVAL1or2SlcR.fhuDgPKp5jp.P9fBXwVNePgeLqb4i3C"
+    +DEFAULT_USER_ROLE: String = "user"
+}
+
+
+class AuthenticationToken {
+    - id: String
+    - userId: String
+    - longLasted: boolean
+    - creationDate: Date
+    - lastConnectionDate: Date
+
+    + getId(): String
+    + setId(id: String): void
+    + getUserId(): String
+    + setUserId(userId: String): void
+    + isLongLasted(): boolean
+    + setLongLasted(longLasted: boolean): void
+    + getCreationDate(): Date
+    + setCreationDate(creationDate: Date): void
+    + getLastConnectionDate(): Date
+    + setLastConnectionDate(lastConnectionDate: Date): void
+    + toString(): String
+}
+
+class User {
+    - id: String
+    - localeId: String
+    - roleId: String
+    - username: String
+    - password: String
+    - email: String
+    - theme: String
+    - firstConnection: boolean
+    - createDate: Date
+    - deleteDate: Date
+
+    + getId(): String
+    + setId(id: String): void
+    + getLocaleId(): String
+    + setLocaleId(localeId: String): void
+    + getRoleId(): String
+    + setRoleId(roleId: String): void
+    + getUsername(): String
+    + setUsername(username: String): void
+    + getPassword(): String
+    + setPassword(password: String): void
+    + getEmail(): String
+    + setEmail(email: String): void
+    + getTheme(): String
+    + setTheme(theme: String): void
+    + isFirstConnection(): boolean
+    + setFirstConnection(firstConnection: boolean): void
+    + getCreateDate(): Date
+    + setCreateDate(createDate: Date): void
+    + getDeleteDate(): Date
+    + setDeleteDate(deleteDate: Date): void
+    + toString(): String
+}
+
+
+class PaginatedList<T> {
+    - limit: int
+    - offset: int
+    - resultCount: int
+    - resultList: List<T>
+
+    + PaginatedList(pageSize: int, offset: int)
+    + getResultCount(): int
+    + setResultCount(resultCount: int): void
+    + getResultList(): List<T>
+    + setResultList(resultList: List<T>): void
+    + getLimit(): int
+    + getOffset(): int
+}
+
+class PaginatedLists {
+    {static} - DEFAULT_PAGE_SIZE: int
+    {static} - MAX_PAGE_SIZE: int
+
+    {static} + create(pageSize: Integer, offset: Integer): PaginatedList<E>
+    {static} + create(): PaginatedList<E>
+    {static} + executeCountQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam): void
+    {static} + executeResultQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam): List<Object[]>
+    {static} + executePaginatedQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam): List<Object[]>
+    {static} + executePaginatedQuery(paginatedList: PaginatedList<E>, queryParam: QueryParam, sortCriteria: SortCriteria): List<Object[]>
+}
+
+class SortCriteria {
+    - column: int
+    - asc: boolean
+
+    + SortCriteria(column: Integer, asc: boolean)
+    + getColumn(): int
+    + isAsc(): boolean
+}
+
+
+class AuthenticationTokenDao {
+    + get(id: String): AuthenticationToken
+    + create(authenticationToken: AuthenticationToken): String
+    + delete(authenticationTokenId: String): void throws Exception
+    + deleteOldSessionToken(userId: String): void
+    + updateLastConnectionDate(id: String): void
+    + getByUserId(userId: String): List<AuthenticationToken>
+    + deleteByUserId(userId: String, id: String): void
+}
+
+class RoleBaseFunctionDao {
+    + findByRoleId(roleId: String): Set<String>
+}
+
+class UserDao {
+    + authenticate(username: String, password: String): String
+    + create(user: User): String
+    + update(user: User): User
+    + updatePassword(user: User): User
+    + getById(id: String): User
+    + getActiveByUsername(username: String): User
+    + getActiveByPasswordResetKey(passwordResetKey: String): User
+    + delete(username: String): void
+    + hashPassword(password: String): String
+    + findAll(paginatedList: PaginatedList<UserDto>, sortCriteria: SortCriteria): void
+}
+
+
+class UserDto {
+    - id: String
+    - localeId: String
+    - username: String
+    - email: String
+    - createTimestamp: Long
+
+    + getId(): String
+    + setId(id: String): void
+    + getLocaleId(): String
+    + setLocaleId(localeId: String): void
+    + getUsername(): String
+    + setUsername(username: String): void
+    + getEmail(): String
+    + setEmail(email: String): void
+    + getCreateTimestamp(): Long
+    + setCreateTimestamp(createTimestamp: Long): void
+}
+
+
+' Relationships
+
+UserResource "1" -- "0..*" AuthenticationTokenDao: > creates
+UserResource "1" -- "0..*" AuthenticationToken: > uses
+
+UserResource "1" -- "1" TokenBasedSecurityFilter: > uses
+UserResource "1" -- "1" ValidationUtil: > uses
+
+UserResource "1" -- "0..*" User: > uses
+UserResource "1" -- "0..*" UserDao: > creates
+UserResource "1" -- "0..*" UserDto: > uses
+UserResource "1" -- "1" UserPrincipal: > uses
+
+UserResource "1" -- "0..*" RoleBaseFunctionDao: > creates
+UserResource -- BaseFunction: > uses
+UserResource "1" -- "1" Constants: > uses
+
+UserResource "1" -- "0..*" PaginatedList: > uses
+UserResource "1" -- "1" PaginatedLists: > uses
+UserResource "1" -- "0..*" SortCriteria: > creates
+
+UserResource "1" -- "0..*" ClientException: > throws
+UserResource "1" -- "0..*" ForbiddenClientException: > throws
+UserResource "1" -- "0..*" ServerException: > throws
+
+PaginatedList "1" o-- "0..*" UserDto: > contains 
+PaginatedLists "1" -- "0..*" PaginatedList: > creates, uses
+
+BaseResource -- BaseFunction: > uses
+BaseResource "1" -- "0..*" ForbiddenClientException: > throws
+BaseResource "1" -- "1" IPrincipal: > uses
+BaseResource "1" -- "1" UserPrincipal: > uses
+BaseResource "1" -- "1" TokenBasedSecurityFilter: > uses
+
+@enduml
